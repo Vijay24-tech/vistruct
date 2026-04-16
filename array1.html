@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vistruct - Array Visualization</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    body {
+      font-family: "Poppins", sans-serif;
+      background: linear-gradient(135deg, #e0c3fc, #8ec5fc);
+      color: #333;
+      margin: 0;
+      text-align: center;
+    }
+nav h1 {
+  color: #00a8ff;
+  font-size: 1.4rem;
+  margin: 0;
+}
+
+nav ul {
+  list-style: none;
+  display: flex;
+  gap: 20px;
+  margin: 0;
+  padding: 0;
+}
+
+nav ul li a {
+  color: #d2dae2;
+  text-decoration: none;
+  font-weight: 500;
+  transition: 0.3s;
+  padding: 6px 10px;
+  border-radius: 6px;
+}
+
+nav ul li a:hover {
+  background: #00a8ff;
+  color: white;
+}
+
+nav ul li a.active {
+  background: #00a8ff;
+  color: white;
+  font-weight: bold;
+}
+
+  .container {
+      margin-top: 50px;
+      padding: 20px;
+    }
+
+    h2 {
+      color: black;
+      font-size: 26px;
+      margin-bottom: 10px;
+    }
+
+    h1 {
+      color: black;
+      margin-bottom: 20px;
+    }
+
+    .controls {
+      margin: 20px auto;
+    }
+
+    input {
+      padding: 10px;
+      margin: 5px;
+      width: 90px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+
+    button {
+      padding: 10px 15px;
+      margin: 5px;
+      border: none;
+      background: #00a8ff;
+      color: white;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    button:hover {
+      background: #0077cc;
+    }
+
+    .array-container {
+      display: flex;
+      justify-content: center;
+      margin-top: 40px;
+      flex-wrap: wrap;
+    }
+
+    .array-box {
+      width: 70px;
+      height: 70px;
+      margin: 10px;
+      background: #28a745;
+      color: white;
+      font-size: 20px;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 10px;
+      transition: all 0.4s ease;
+      position: relative;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .array-box.highlight {
+      background: #ffc107;
+      transform: scale(1.2);
+    }
+
+    .array-box::after {
+      content: attr(data-index);
+      position: absolute;
+      bottom: -25px;
+      font-size: 14px;
+      color: #333;
+    }
+
+    #message {
+      margin-top: 25px;
+      font-size: 18px;
+      color: #0a3d62;
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <h1>Vistruct</h1>
+    <ul>
+      <li><a href="index.html">Home</a></li>
+      <li><a href="array1.html" class="active">Array</a></li>
+      <li><a href="stack.html">Stack</a></li>
+      <li><a href="queue.html">Queue</a></li>
+      <li><a href="linkedlist.html">Linked List</a></li>
+      <li><a href="tree.html">Tree</a></li>
+      <li><a href="graph.html">Graph</a></li>
+      <li><a href="chatbot.html">Chatbot</a></li>
+    </ul>
+  </nav>
+
+  <div class="container">
+    <h1>🧩 Understanding Arrays</h1>
+
+    <div class="controls">
+      <input type="number" id="index" placeholder="Index">
+      <input type="text" id="value" placeholder="Value">
+      <button onclick="insertValue()">Insert</button>
+      <button onclick="updateValue()">Update</button>
+      <button onclick="searchValue()">Search</button>
+      <button onclick="resetArray()">Reset</button>
+    </div>
+
+    <div class="array-container" id="arrayContainer"></div>
+
+    <p id="message">An array stores multiple values in contiguous memory locations.</p>
+  </div>
+
+  <script>
+    let array = [5, 10, 15, 20, 25];
+    const container = document.getElementById('arrayContainer');
+    const msg = document.getElementById('message');
+
+    function renderArray() {
+      container.innerHTML = '';
+      array.forEach((val, i) => {
+        const box = document.createElement('div');
+        box.className = 'array-box';
+        box.textContent = val;
+        box.dataset.index = i;
+        container.appendChild(box);
+      });
+    }
+    renderArray();
+
+    function highlightBox(i, colorMessage) {
+      const boxes = document.querySelectorAll('.array-box');
+      boxes.forEach(b => b.classList.remove('highlight'));
+      if (i >= 0 && i < boxes.length) {
+        boxes[i].classList.add('highlight');
+        msg.textContent = colorMessage;
+      }
+    }
+
+    function insertValue() {
+      const index = parseInt(document.getElementById('index').value);
+      const value = document.getElementById('value').value;
+      if (isNaN(index) || !value) return alert("Enter valid index and value!");
+      if (index < 0 || index > array.length) return alert("Index out of range!");
+
+      array.splice(index, 0, value);
+      renderArray();
+      highlightBox(index, `Inserted value '${value}' at index ${index}.`);
+    }
+
+    function updateValue() {
+      const index = parseInt(document.getElementById('index').value);
+      const value = document.getElementById('value').value;
+      if (isNaN(index) || !value) return alert("Enter valid index and value!");
+      if (index < 0 || index >= array.length) return alert("Index out of range!");
+
+      array[index] = value;
+      renderArray();
+      highlightBox(index, `Updated index ${index} with new value '${value}'.`);
+    }
+
+    function searchValue() {
+      const value = document.getElementById('value').value;
+      if (!value) return alert("Enter value to search!");
+      
+      const boxes = document.querySelectorAll('.array-box');
+      let found = false;
+      let i = 0;
+
+      msg.textContent = "Searching...";
+      boxes.forEach(b => b.classList.remove('highlight'));
+
+      const interval = setInterval(() => {
+        boxes.forEach(b => b.classList.remove('highlight'));
+        if (i < array.length) {
+          boxes[i].classList.add('highlight');
+          msg.textContent = `Checking index ${i}...`;
+          if (array[i].toString() === value) {
+            msg.textContent = `✅ Found value '${value}' at index ${i}.`;
+            found = true;
+            clearInterval(interval);
+          }
+          i++;
+        } else {
+          clearInterval(interval);
+          if (!found) msg.textContent = `❌ Value '${value}' not found in array.`;
+        }
+      }, 800);
+    }
+
+    function resetArray() {
+      array = [5, 10, 15, 20, 25];
+      renderArray();
+      msg.textContent = "Array reset to default values.";
+    }
+
+    // Highlight active navigation
+    const current = location.pathname.split("/").slice(-1)[0];
+    document.querySelectorAll("nav ul li a").forEach(a => {
+      if (a.getAttribute("href") === current) a.classList.add("active");
+    });
+  </script>
+</body>
+</html>

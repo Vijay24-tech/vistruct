@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vistruct - Data Structures Visualizer</title>
+  <link rel="stylesheet" href="style.css"/>
+ 
+</head>
+<body>
+  <nav>
+    <h1>Vistruct</h1>
+    <ul>
+      <li><a href="index.html">Home</a></li>
+      <li><a href="array1.html">Array</a></li>
+      <li><a href="stack.html">Stack</a></li>
+      <li><a href="queue.html">Queue</a></li>
+      <li><a href="linkedlist.html">Linked List</a></li>
+      <li><a href="tree.html">Tree</a></li>
+      <li><a href="graph.html">Graph</a></li>
+      <li><a href="chatbot.html">Chatbot</a></li>
+    </ul>
+  </nav>
+
+  <div class="container">
+    <h2><b>Welcome to <span style="color:#00a8ff;">Vistruct</span></b></h2>
+    <pre><h3>Experience the power of visual learning as arrays, stacks, queues, linked lists, trees, and graphs transform into vibrant, animated models.
+Interact, insert, delete, and traverse in real time — watch every operation unfold before your eyes.
+Whether you’re a beginner exploring concepts or a pro polishing logic, Vistruct makes understanding data structures intuitive, engaging, and unforgettable.
+</h3></pre>
+  </div>
+
+  <div class="image-section">
+    <img src="data2.jpg.jpeg" alt="data structures">
+    <div class="developers">
+      <h3>DEVELOPED BY:</h3>
+      <ul>
+        <li>SANKETH KUMAR</li>
+        <li>VG TIRUMALACHARYA</li>
+        <li>VIJAY VISHNU G</li>
+        <li>VINOD KUMAR</li>
+      </ul>
+    </div>
+  </div>
+
+  <script>
+    const current = location.pathname.split("/").slice(-1)[0];
+    document.querySelectorAll("nav ul li a").forEach(a => {
+      if (a.getAttribute("href") === current) a.classList.add("active");
+    });
+  </script>
+</body>
+</html>

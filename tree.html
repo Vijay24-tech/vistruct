@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vistruct - Binary Tree Visualization</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    /* ===== Tree Page Styling ===== */
+    body {
+      font-family: 'Poppins', sans-serif;
+      text-align: center;
+      background: linear-gradient(135deg, #e0c3fc, #8ec5fc);
+      color: white;
+      margin: 0;
+      overflow-x: hidden;
+    }
+
+    nav {
+      background: #1e272e;
+      padding: 1rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    nav h1 {
+      color: #00a8ff;
+      font-size: 1.4rem;
+      margin: 0;
+    }
+
+    nav ul {
+      list-style: none;
+      display: flex;
+      gap: 20px;
+      margin: 0;
+      padding: 0;
+    }
+
+    nav ul li a {
+      color: #d2dae2;
+      text-decoration: none;
+      font-weight: 500;
+      transition: 0.3s;
+      padding: 6px 10px;
+      border-radius: 6px;
+    }
+
+    nav ul li a:hover {
+      background: #00a8ff;
+      color: white;
+    }
+
+    nav ul li a.active {
+      background: #00a8ff;
+      color: white;
+      font-weight: bold;
+    }
+
+    .container { margin-top: 50px; }
+    .container { margin-top: 80px; }
+
+    h2 {
+      font-size: 2rem;
+      margin-bottom: 10px;
+      color:black;
+    }
+
+    .controls {
+      margin: 20px 0;
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    input[type="number"] {
+      padding: 8px 10px;
+      border-radius: 8px;
+      border: none;
+      outline: none;
+      font-size: 16px;
+      width: 120px;
+      text-align: center;
+    }
+
+    button {
+      background-color: rgb(12, 176, 184);
+      color: #3a1c71;
+      border: none;
+      padding: 10px 20px;
+      margin: 5px;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+    }
+
+    svg {
+      width: 100%;
+      height: 520px;
+      margin-top: 30px;
+    }
+
+    .node { transition: transform 0.4s ease, fill 0.3s ease; }
+    .node circle {
+      fill: #fff;
+      stroke: #3a1c71;
+      stroke-width: 3;
+      transition: 0.3s;
+    }
+    .node text { fill: #3a1c71; font-weight: 600; }
+
+    /* search highlight */
+    .highlight circle { fill: #ffeb3b !important; }
+    .found circle { fill: #4caf50 !important; }
+
+    /* traversal highlight */
+    .traverse circle { fill: #ff8c42 !important; stroke: #ff6f00; }
+
+    .link { stroke: white; stroke-width: 3; }
+
+    .panel {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+
+    .panel .card {
+      background: rgba(255,255,255,0.95);
+      color: #222;
+      padding: 12px 16px;
+      border-radius: 10px;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+      min-width: 220px;
+      text-align: left;
+    }
+
+    .traversal-controls { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+
+    #traversal-output {
+      margin-top: 12px;
+      font-weight: 700;
+      color: #222;
+      min-height: 22px;
+    }
+
+    footer {
+      margin-top: 20px;
+      font-size: 14px;
+      color: #f1f1f1;
+      opacity: 0.8;
+    }
+
+    @media (max-width:700px) {
+      svg { height: 720px; }
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <h1>Vistruct</h1>
+    <ul>
+      <li><a href="index.html">Home</a></li>
+      <li><a href="array1.html">Array</a></li>
+      <li><a href="stack.html">Stack</a></li>
+      <li><a href="queue.html">Queue</a></li>
+      <li><a href="linkedlist.html">Linked List</a></li>
+      <li><a href="tree.html" class="active">Tree</a></li>
+      <li><a href="graph.html">Graph</a></li>
+      <li><a href="chatbot.html">Chatbot</a></li>
+    </ul>
+  </nav>
+
+  <div class="container">
+    <h2>🌳 Binary Search Tree Visualization</h2>
+    <p style="color:#222"><b>Insert / Search / Clear</b> — and explore <b>Traversals</b> (Inorder, Preorder, Postorder) with animation.</p>
+
+    <!-- Dashboard selector -->
+    <div class="controls">
+      <label style="background:white;color:#3a1c71;padding:8px 10px;border-radius:8px;font-weight:600;">Mode:</label>
+      <select id="modeSelect" style="padding:8px;border-radius:8px;border:none;font-weight:600;">
+        <option value="normal">Normal Binary Search Tree</option>
+        <option value="traverse">Traversal Methods (Inorder / Pre / Post)</option>
+      </select>
+    </div>
+
+    <div class="panel">
+      <!-- Normal BST controls -->
+      <div class="card" id="bstControls">
+        <div style="margin-bottom:8px; font-weight:700">BST Controls</div>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <input id="valueInput" type="number" placeholder="Enter value" />
+          <button onclick="insertNode()">Insert</button>
+          <button onclick="searchNode()">Search</button>
+          <button onclick="clearTree()" style="background:#e74c3c;color:white;">Clear</button>
+        </div>
+        <div style="margin-top:8px;color:#444;font-weight:600" id="bstInfo">Tree empty.</div>
+      </div>
+
+      <!-- Traversal panel -->
+      <div class="card" id="traversalCard" style="display:none;">
+        <div style="margin-bottom:8px; font-weight:700">Traversal Methods</div>
+        <div class="traversal-controls">
+          <label style="font-weight:600;">Type</label>
+          <select id="traversalType" style="padding:6px;border-radius:6px;">
+            <option value="inorder">Inorder</option>
+            <option value="preorder">Preorder</option>
+            <option value="postorder">Postorder</option>
+          </select>
+          <button id="startTraversal" style="background:#00a8ff;color:white;">Start Traversal</button>
+          <button id="stopTraversal" style="background:#ff6b6b;color:white;display:none;">Stop</button>
+        </div>
+        <div id="traversal-output" style="margin-top:12px;color:#333">Sequence: <span id="seq"></span></div>
+        <div style="margin-top:8px;color:#666;font-size:14px">Build the tree first (Insert) then choose traversal.</div>
+      </div>
+    </div>
+
+    <svg id="treeSVG"></svg>
+  </div>
+
+  <footer>© 2025 Vistruct | Interactive Data Structures Visualizer</footer>
+
+  <script>
+    // Basic BST structure & rendering (based on your original)
+    const svg = document.getElementById('treeSVG');
+    const valueInput = document.getElementById('valueInput');
+    const bstInfo = document.getElementById('bstInfo');
+
+    let treeData = null;
+
+    class Node {
+      constructor(value, x, y, level) {
+        this.value = value;
+        this.left = null;
+        this.right = null;
+        this.x = x;
+        this.y = y;
+        this.level = level;
+      }
+    }
+
+    function insertNode() {
+      const val = parseInt(valueInput.value);
+      if (isNaN(val)) return alert('⚠️ Please enter a number!');
+      if (!treeData) {
+        treeData = new Node(val, window.innerWidth / 2, 60, 1);
+      } else {
+        const inserted = insertRecursive(treeData, val, window.innerWidth / 2, 60, 1, window.innerWidth / 4);
+        if (!inserted) {
+          valueInput.value = '';
+          return alert('⚠️ Number already exists in the tree!');
+        }
+      }
+      valueInput.value = '';
+      drawTree();
+      updateBSTInfo();
+    }
+
+    function insertRecursive(node, value, x, y, level, offset) {
+      if (value < node.value) {
+        if (!node.left) {
+          node.left = new Node(value, x - offset, y + 90, level + 1);
+          return true;
+        } else {
+          return insertRecursive(node.left, value, x - offset, y + 90, level + 1, Math.max(20, offset / 2));
+        }
+      } else if (value > node.value) {
+        if (!node.right) {
+          node.right = new Node(value, x + offset, y + 90, level + 1);
+          return true;
+        } else {
+          return insertRecursive(node.right, value, x + offset, y + 90, level + 1, Math.max(20, offset / 2));
+        }
+      } else {
+        return false;
+      }
+    }
+
+    function drawTree() {
+      svg.innerHTML = '';
+      if (!treeData) return;
+      drawLinks(treeData);
+      drawNodes(treeData);
+    }
+
+    function drawNodes(node) {
+      if (!node) return;
+      const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+      g.classList.add('node');
+      g.setAttribute('transform', `translate(${node.x},${node.y})`);
+
+      const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      circle.setAttribute('r', 22);
+      const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      text.setAttribute('dy', 7);
+      text.setAttribute('text-anchor', 'middle');
+      text.textContent = node.value;
+
+      g.appendChild(circle);
+      g.appendChild(text);
+      svg.appendChild(g);
+
+      // Draw children
+      drawNodes(node.left);
+      drawNodes(node.right);
+    }
+
+    function drawLinks(node) {
+      if (!node) return;
+      if (node.left) drawLine(node.x, node.y, node.left.x, node.left.y);
+      if (node.right) drawLine(node.x, node.y, node.right.x, node.right.y);
+      drawLinks(node.left);
+      drawLinks(node.right);
+    }
+
+    function drawLine(x1, y1, x2, y2) {
+      const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      line.classList.add('link');
+      line.setAttribute('x1', x1);
+      line.setAttribute('y1', y1);
+      line.setAttribute('x2', x2);
+      line.setAttribute('y2', y2);
+      svg.appendChild(line);
+    }
+
+    // Search highlight (keeps your original style, async)
+    async function searchNode() {
+      const val = parseInt(valueInput.value);
+      if (isNaN(val)) return alert('⚠️ Please enter a number!');
+      if (!treeData) return alert('🌲 Tree is empty!');
+      const found = await highlightSearch(treeData, val);
+      if (!found) alert('❌ Number not found in the tree!');
+      valueInput.value = '';
+    }
+
+    async function highlightSearch(node, val) {
+      if (!node) return false;
+      // find corresponding DOM group for this node value
+      const nodeElems = [...svg.querySelectorAll('.node')];
+      const elem = nodeElems.find(e => e.querySelector('text').textContent == node.value);
+      if (elem) elem.classList.add('highlight');
+      await new Promise(r => setTimeout(r, 650));
+
+      if (node.value === val) {
+        if (elem) {
+          elem.classList.remove('highlight');
+          elem.classList.add('found');
+        }
+        return true;
+      } else if (val < node.value) {
+        const found = await highlightSearch(node.left, val);
+        if (elem) elem.classList.remove('highlight');
+        return found;
+      } else {
+        const found = await highlightSearch(node.right, val);
+        if (elem) elem.classList.remove('highlight');
+        return found;
+      }
+    }
+
+    function clearTree() {
+      treeData = null;
+      svg.innerHTML = '';
+      bstInfo.textContent = 'Tree empty.';
+      stopTraversalIfRunning();
+    }
+
+    function updateBSTInfo() {
+      if (!treeData) bstInfo.textContent = 'Tree empty.';
+      else bstInfo.textContent = 'Root: ' + treeData.value;
+    }
+
+    // ---------------- Traversals ----------------
+    // Build arrays of node values following traversal order
+    function inorderArr(node, arr=[]) {
+      if (!node) return arr;
+      inorderArr(node.left, arr);
+      arr.push(node.value);
+      inorderArr(node.right, arr);
+      return arr;
+    }
+    function preorderArr(node, arr=[]) {
+      if (!node) return arr;
+      arr.push(node.value);
+      preorderArr(node.left, arr);
+      preorderArr(node.right, arr);
+      return arr;
+    }
+    function postorderArr(node, arr=[]) {
+      if (!node) return arr;
+      postorderArr(node.left, arr);
+      postorderArr(node.right, arr);
+      arr.push(node.value);
+      return arr;
+    }
+
+    // Traversal animation controller
+    let traversalTimer = null;
+    let traversalStopped = false;
+
+    async function animateTraversal(sequence) {
+      // sequence: array of node values in order
+      const seqSpan = document.getElementById('seq');
+      seqSpan.textContent = '';
+      traversalStopped = false;
+      // reveal stop button
+      document.getElementById('startTraversal').style.display = 'none';
+      document.getElementById('stopTraversal').style.display = 'inline-block';
+
+      for (let i = 0; i < sequence.length; i++) {
+        if (traversalStopped) break;
+        const value = sequence[i];
+        // highlight the corresponding node element
+        const nodeElems = [...svg.querySelectorAll('.node')];
+        const elem = nodeElems.find(e => e.querySelector('text').textContent == value);
+        if (elem) {
+          elem.classList.add('traverse');
+          // scroll into view slightly by translating svg (only if small screens)
+          await new Promise(r => setTimeout(r, 650));
+          elem.classList.remove('traverse');
+        } else {
+          // if element not found, just wait
+          await new Promise(r => setTimeout(r, 650));
+        }
+        // accumulate sequence text
+        seqSpan.textContent = seqSpan.textContent ? seqSpan.textContent + ' → ' + value : String(value);
+      }
+
+      // finished or stopped
+      document.getElementById('startTraversal').style.display = 'inline-block';
+      document.getElementById('stopTraversal').style.display = 'none';
+    }
+
+    function stopTraversalIfRunning() {
+      traversalStopped = true;
+      document.getElementById('startTraversal').style.display = 'inline-block';
+      document.getElementById('stopTraversal').style.display = 'none';
+    }
+
+    document.getElementById('startTraversal').addEventListener('click', () => {
+      if (!treeData) return alert('🌲 Build the tree first (insert nodes) before traversing!');
+      const type = document.getElementById('traversalType').value;
+      let seq = [];
+      if (type === 'inorder') seq = inorderArr(treeData, []);
+      else if (type === 'preorder') seq = preorderArr(treeData, []);
+      else seq = postorderArr(treeData, []);
+      // animate using node values
+      animateTraversal(seq);
+    });
+
+    document.getElementById('stopTraversal').addEventListener('click', () => {
+      stopTraversalIfRunning();
+    });
+
+    // Mode switching (Normal / Traversal)
+    const modeSelect = document.getElementById('modeSelect');
+    const bstControls = document.getElementById('bstControls');
+    const traversalCard = document.getElementById('traversalCard');
+
+    modeSelect.addEventListener('change', () => {
+      if (modeSelect.value === 'traverse') {
+        bstControls.style.display = 'none';
+        traversalCard.style.display = 'block';
+      } else {
+        traversalCard.style.display = 'none';
+        bstControls.style.display = 'block';
+      }
+    });
+
+    // Keep active nav highlight
+    const current = location.pathname.split("/").slice(-1)[0];
+    document.querySelectorAll("nav ul li a").forEach(a => {
+      if (a.getAttribute("href") === current) a.classList.add("active");
+    });
+
+    // redraw on resize to keep spacing reasonable
+    window.addEventListener('resize', () => {
+      // If tree exists, recompute positions to center nodes nicely
+      if (!treeData) return;
+      recomputePositions(treeData, window.innerWidth / 2, 60, window.innerWidth / 4);
+      drawTree();
+    });
+
+    function recomputePositions(node, x, y, offset) {
+      if (!node) return;
+      node.x = x;
+      node.y = y;
+      if (node.left) recomputePositions(node.left, x - offset, y + 90, Math.max(20, offset / 2));
+      if (node.right) recomputePositions(node.right, x + offset, y + 90, Math.max(20, offset / 2));
+    }
+
+    // initial draw (empty)
+    drawTree();
+  </script>
+</body>
+</html>

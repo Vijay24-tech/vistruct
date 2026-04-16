@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vistruct - Graph Visualization</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    body {
+      background: linear-gradient(135deg, #e0c3fc, #8ec5fc);
+      color: #333;
+      font-family: 'Poppins', sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      width: 90%;
+      max-width: 1000px;
+      background: linear-gradient(135deg, #e0c3fc, #8ec5fc);
+      border-radius: 20px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      padding: 30px;
+      margin: 50px auto;
+      text-align: center;
+    }
+
+    h2 {
+      color: black;
+      font-size: 28px;
+      margin-bottom: 10px;
+    }
+
+    p {
+      font-size: 15px;
+      color: #555;
+      margin-bottom: 15px;
+    }
+
+    .controls, .algo-controls {
+      margin: 15px 0;
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    input, select, button {
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 14px;
+    }
+
+    button {
+      background-color: #0ca396;
+      color: white;
+      border: none;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #0c91b2;
+    }
+
+    #graphCanvas {
+      width: 100%;
+      height: 500px;
+      border-radius: 15px;
+      background-color: #f3f4f6;
+      margin-top: 20px;
+      cursor: crosshair;
+    }
+
+    #output {
+      margin-top: 15px;
+      text-align: left;
+      font-size: 14px;
+      line-height: 1.6;
+      color: #333;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <h1>Vistruct</h1>
+    <ul>
+      <li><a href="index.html">Home</a></li>
+      <li><a href="array1.html">Array</a></li>
+      <li><a href="stack.html">Stack</a></li>
+      <li><a href="queue.html">Queue</a></li>
+      <li><a href="linkedlist.html">Linked List</a></li>
+      <li><a href="tree.html">Tree</a></li>
+      <li><a href="graph.html" class="active">Graph</a></li>
+      <li><a href="chatbot.html">Chatbot</a></li>
+    </ul>
+  </nav>
+
+  <div class="container">
+    <h2>Graph Visualizer</h2>
+    <p>Click on the canvas to place a node. Visualize <b>BFS</b> and <b>DFS</b> traversals in real time.</p>
+
+    <div class="controls">
+      <input type="text" id="nodeName" placeholder="Node name (e.g. A)" />
+      <input type="text" id="edgeStart" placeholder="From (e.g. A)" />
+      <input type="text" id="edgeEnd" placeholder="To (e.g. B)" />
+      <select id="graphType">
+        <option value="undirected">Undirected</option>
+        <option value="directed">Directed</option>
+      </select>
+      <button onclick="addEdge()">Add Edge</button>
+      <button onclick="resetGraph()">Reset</button>
+    </div>
+
+    <div class="algo-controls">
+      <input type="text" id="startNode" placeholder="Start node for BFS/DFS (e.g. A)" />
+      <button onclick="runBFS()">Run BFS</button>
+      <button onclick="runDFS()">Run DFS</button>
+    </div>
+
+    <canvas id="graphCanvas"></canvas>
+    <div id="output"></div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('graphCanvas');
+    const ctx = canvas.getContext('2d');
+    let nodes = [];
+    let edges = [];
+
+    function resizeCanvas() {
+      canvas.width = canvas.clientWidth;
+      canvas.height = 500;
+      drawGraph();
+    }
+
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    // Click to add node
+    canvas.addEventListener('click', (e) => {
+      const name = document.getElementById('nodeName').value.trim();
+      if (!name || nodes.find(n => n.name === name)) {
+        return alert("Enter a unique node name in the input!");
+      }
+      const rect = canvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      nodes.push({ name, x, y });
+      drawGraph();
+      document.getElementById('nodeName').value = '';
+    });
+
+    function addEdge() {
+      const from = document.getElementById('edgeStart').value.trim();
+      const to = document.getElementById('edgeEnd').value.trim();
+      const type = document.getElementById('graphType').value;
+
+      if (!from || !to || from === to) return alert("Invalid edge input!");
+      if (!nodes.find(n => n.name === from) || !nodes.find(n => n.name === to))
+        return alert("Both nodes must exist!");
+
+      edges.push({ from, to, type });
+      drawGraph();
+      document.getElementById('edgeStart').value = '';
+      document.getElementById('edgeEnd').value = '';
+    }
+
+    function resetGraph() {
+      nodes = [];
+      edges = [];
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      document.getElementById('output').innerText = '';
+    }
+
+    function drawGraph(highlightedNode = null) {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Draw edges
+      edges.forEach(edge => {
+        const fromNode = nodes.find(n => n.name === edge.from);
+        const toNode = nodes.find(n => n.name === edge.to);
+        if (!fromNode || !toNode) return;
+
+        ctx.beginPath();
+        ctx.moveTo(fromNode.x, fromNode.y);
+        ctx.lineTo(toNode.x, toNode.y);
+        ctx.strokeStyle = "#5a00b3";
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        if (edge.type === "directed") {
+          const angle = Math.atan2(toNode.y - fromNode.y, toNode.x - fromNode.x);
+          const arrowLength = 10;
+          ctx.beginPath();
+          ctx.moveTo(toNode.x, toNode.y);
+          ctx.lineTo(toNode.x - arrowLength * Math.cos(angle - 0.3), toNode.y - arrowLength * Math.sin(angle - 0.3));
+          ctx.lineTo(toNode.x - arrowLength * Math.cos(angle + 0.3), toNode.y - arrowLength * Math.sin(angle + 0.3));
+          ctx.closePath();
+          ctx.fillStyle = "#5a00b3";
+          ctx.fill();
+        }
+      });
+
+      // Draw nodes
+      nodes.forEach(node => {
+        ctx.beginPath();
+        ctx.arc(node.x, node.y, 25, 0, 2 * Math.PI);
+        ctx.fillStyle = highlightedNode === node.name ? "#ffca28" : "#a1c4fd";
+        ctx.fill();
+        ctx.strokeStyle = "#5a00b3";
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        ctx.fillStyle = "#333";
+        ctx.font = "bold 16px Poppins";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(node.name, node.x, node.y);
+      });
+    }
+
+    function buildAdjList() {
+      const adj = {};
+      nodes.forEach(n => adj[n.name] = []);
+      edges.forEach(e => {
+        adj[e.from].push(e.to);
+        if (e.type === 'undirected') adj[e.to].push(e.from);
+      });
+      return adj;
+    }
+
+    async function runBFS() {
+      const start = document.getElementById('startNode').value.trim();
+      if (!start || !nodes.find(n => n.name === start)) return alert("Enter a valid start node!");
+
+      const adj = buildAdjList();
+      const visited = new Set();
+      const queue = [start];
+      const traversalOrder = [];
+      visited.add(start);
+
+      while (queue.length > 0) {
+        const curr = queue.shift();
+        traversalOrder.push(curr);
+        drawGraph(curr);
+        document.getElementById('output').innerText = "BFS Traversal: " + traversalOrder.join(" → ");
+        await sleep(800);
+        for (let neighbor of adj[curr]) {
+          if (!visited.has(neighbor)) {
+            visited.add(neighbor);
+            queue.push(neighbor);
+          }
+        }
+      }
+
+      drawGraph();
+      document.getElementById('output').innerText = "✅ BFS Completed! Order: " + traversalOrder.join(" → ");
+    }
+
+    async function runDFS() {
+      const start = document.getElementById('startNode').value.trim();
+      if (!start || !nodes.find(n => n.name === start)) return alert("Enter a valid start node!");
+
+      const adj = buildAdjList();
+      const visited = new Set();
+      const traversalOrder = [];
+
+      async function dfs(node) {
+        visited.add(node);
+        traversalOrder.push(node);
+        drawGraph(node);
+        document.getElementById('output').innerText = "DFS Traversal: " + traversalOrder.join(" → ");
+        await sleep(800);
+        for (let neighbor of adj[node]) {
+          if (!visited.has(neighbor)) {
+            await dfs(neighbor);
+          }
+        }
+      }
+
+      await dfs(start);
+      drawGraph();
+      document.getElementById('output').innerText = "✅ DFS Completed! Order: " + traversalOrder.join(" → ");
+    }
+
+    function sleep(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    const current = location.pathname.split("/").slice(-1)[0];
+    document.querySelectorAll("nav ul li a").forEach(a => {
+      if (a.getAttribute("href") === current) a.classList.add("active");
+    });
+  </script>
+</body>
+</html>

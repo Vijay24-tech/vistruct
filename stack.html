@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vistruct - Stack Visualization</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    body {
+      font-family: "Poppins", sans-serif;
+      background: linear-gradient(135deg, #e0c3fc, #8ec5fc);
+      color: #333;
+      margin: 0;
+      text-align: center;
+      overflow-x: hidden;
+    }
+/* Input boxes for infix & postfix expressions */
+#expression,
+#postfixExpr {
+  width: 70%;
+  max-width: 550px;
+  padding: 14px 16px;
+  border: 1.5px solid #ccc;
+  border-radius: 10px;
+  font-size: 18px;
+  margin: 15px auto;
+  display: block;
+  text-align: center;
+  transition: 0.3s;
+}
+
+#expression:focus,
+#postfixExpr:focus {
+  outline: none;
+  border-color: #00a8ff;
+  box-shadow: 0 0 10px rgba(0, 168, 255, 0.4);
+}
+
+.visual-section button {
+  padding: 12px 18px;
+  font-size: 16px;
+  background-color: #00a8ff;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  margin-left: 10px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.visual-section button:hover {
+  transform: scale(1.05);
+  opacity: 0.9;
+}
+    nav h1 {
+      color: #00a8ff;
+      font-size: 1.4rem;
+      margin: 0;
+    }
+
+    nav ul {
+      list-style: none;
+      display: flex;
+      gap: 20px;
+      margin: 0;
+      padding: 0;
+    }
+
+    nav ul li a {
+      color: #d2dae2;
+      text-decoration: none;
+      font-weight: 500;
+      transition: 0.3s;
+      padding: 6px 10px;
+      border-radius: 6px;
+    }
+
+    nav ul li a:hover,
+    nav ul li a.active {
+      background: #00a8ff;
+      color: white;
+    }
+    .container {
+      margin-top: 60px;
+      padding: 20px;
+    }
+
+    /* Controls & Input Styling */
+    .controls {
+      margin: 20px 0;
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    #stack-input {
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 16px;
+      width: 180px;
+    }
+
+    button {
+      padding: 10px 16px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 16px;
+      color: white;
+      transition: 0.3s;
+      font-weight: bold;
+    }
+
+    #push-btn { background-color: #00a8ff; }
+    #pop-btn { background-color: #e74c3c; }
+    button:hover { transform: scale(1.05); opacity: 0.9; }
+
+    /* Stack Display */
+    .stack-container {
+      position: relative;
+      width: 220px;
+      min-height: 300px;
+      margin: 40px auto;
+      display: flex;
+      flex-direction: column-reverse;
+      align-items: center;
+      padding: 10px;
+    }
+
+    .stack-boundary {
+      width: 100%;
+      height: 100%;
+      border-left: 2px solid #333;
+      border-right: 2px solid #333;
+      border-bottom: 2px solid #333;
+      position: absolute;
+      bottom: 0;
+      pointer-events: none;
+    }
+
+    .stack-item {
+      width: 90%;
+      background-color: #00a8ff;
+      color: white;
+      padding: 15px;
+      text-align: center;
+      margin-bottom: 6px;
+      border-radius: 5px;
+      transition: transform 0.5s ease-in-out, opacity 0.5s ease-in-out;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    }
+
+    .stack-item.push-animation { animation: push-in 0.3s forwards; }
+    .stack-item.pop-animation { animation: pop-out 0.3s forwards; }
+
+    .stack-info {
+      position: absolute;
+      top: 10px;
+      color: #555;
+      font-style: italic;
+      width: 100%;
+      text-align: center;
+    }
+
+    @keyframes push-in {
+      from { transform: translateY(100px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    @keyframes pop-out {
+      from { transform: translateY(0); opacity: 1; }
+      to { transform: translateY(-150px); opacity: 0; }
+    }
+
+    /* Applications Section */
+    .mode-select { margin: 20px; }
+    select {
+      padding: 10px;
+      border-radius: 6px;
+      font-size: 16px;
+      border: 1px solid #aaa;
+    }
+
+    .application-section {
+      display: none;
+      margin-top: 30px;
+    }
+
+    /* --- Infix & Postfix Visualizer Styling --- */
+    .visual-section {
+      background: rgba(255, 255, 255, 0.8);
+      margin: 30px auto;
+      width: 90%;
+      max-width: 950px;
+      border-radius: 16px;
+      padding: 25px;
+      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .container-flex {
+      display: flex;
+      justify-content: space-around;
+      flex-wrap: wrap;
+      margin-top: 30px;
+      gap: 20px;
+    }
+
+    .stack-box, .output-box {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      width: 40%;
+      min-width: 300px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .box {
+      width: 55px;
+      height: 55px;
+      border-radius: 10px;
+      background: #00a8ff;
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 20px;
+      margin: 8px auto;
+      transition: all 0.4s ease;
+    }
+
+    .output-box .box {
+      background: #f39c12;
+      margin: 5px;
+    }
+
+    .output-bar {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-wrap: wrap;
+      min-height: 70px;
+    }
+
+    #step, #evalStep {
+      margin-top: 20px;
+      font-size: 17px;
+      color: #2f3640;
+    }
+
+    h2{
+      color: black;
+    }
+    #eval-output {
+      margin-top: 15px;
+      font-weight: bold;
+      font-size: 20px;
+      color: #2f3640;
+    }
+  </style>
+</head>
+
+<body>
+  <nav>
+    <h1>Vistruct</h1>
+    <ul>
+      <li><a href="index.html">Home</a></li>
+      <li><a href="array1.html">Array</a></li>
+      <li><a href="stack.html" class="active">Stack</a></li>
+      <li><a href="queue.html">Queue</a></li>
+      <li><a href="linkedlist.html">Linked List</a></li>
+      <li><a href="tree.html">Tree</a></li>
+      <li><a href="graph.html">Graph</a></li>
+      <li><a href="chatbot.html">Chatbot</a></li>
+    </ul>
+  </nav>
+
+
+
+  <div class="container">
+    <h2>🧱 Stack Visualizer & Applications</h2>
+
+    <!-- Mode Switch -->
+    <div class="mode-select">
+      <label for="mode">Choose Stack Mode: </label>
+      <select id="mode">
+        <option value="normal">Normal Stack Operations</option>
+        <option value="applications">Applications of Stack</option>
+      </select>
+    </div>
+
+    <!-- NORMAL STACK -->
+    <div id="normal-stack-section">
+      <div class="controls">
+        <input type="text" id="stack-input" placeholder="Enter a value" />
+        <button id="push-btn">Push</button>
+        <button id="pop-btn">Pop</button>
+      </div>
+
+      <div class="stack-container">
+        <div class="stack-boundary"></div>
+        <div class="stack-info" id="status-message">Stack is empty.</div>
+      </div>
+    </div>
+
+    <!-- APPLICATIONS SECTION -->
+    <div id="stack-applications" class="application-section">
+      <h2>📘 Applications of Stack</h2>
+
+      <!-- INFIX TO POSTFIX VISUALIZER -->
+      <div class="visual-section">
+        <h2>🔁 Infix to Postfix Conversion</h2>
+        <input type="text" id="expression" placeholder="Enter infix (e.g. A+B*C)">
+        <button onclick="startConversion()">Convert</button>
+
+        <div class="container-flex">
+          <div class="stack-box">
+            <h3>📚 Stack</h3>
+            <div id="stackArea"></div>
+          </div>
+          <div class="output-box">
+            <h3>🧮 Postfix Output</h3>
+            <div class="output-bar" id="outputArea"></div>
+          </div>
+        </div>
+
+        <p id="step">Enter an expression and click Convert.</p>
+      </div>
+
+      <!-- POSTFIX EVALUATION VISUALIZER -->
+      <div class="visual-section">
+        <h2>⚙️ Postfix Expression Evaluation</h2>
+        <input type="text" id="postfixExpr" placeholder="Enter postfix (e.g. 23*54*+9-)">
+        <button onclick="startEvaluation()">Evaluate</button>
+
+        <div class="container-flex">
+          <div class="stack-box">
+            <h3>🧱 Stack (Numbers)</h3>
+            <div id="evalStackArea"></div>
+          </div>
+          <div class="output-box">
+            <h3>💡 Current Step</h3>
+            <div id="evalStep">Enter a postfix expression to evaluate.</div>
+          </div>
+        </div>
+
+        <div id="eval-output"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Mode Switch
+    const modeSelect = document.getElementById("mode");
+    const normalSection = document.getElementById("normal-stack-section");
+    const appSection = document.getElementById("stack-applications");
+
+    modeSelect.addEventListener("change", () => {
+      if (modeSelect.value === "applications") {
+        normalSection.style.display = "none";
+        appSection.style.display = "block";
+      } else {
+        appSection.style.display = "none";
+        normalSection.style.display = "block";
+      }
+    });
+
+    // --- Normal Stack Logic ---
+    const input = document.getElementById("stack-input");
+    const pushBtn = document.getElementById("push-btn");
+    const popBtn = document.getElementById("pop-btn");
+    const stackContainer = document.querySelector(".stack-container");
+    const statusMessage = document.getElementById("status-message");
+
+    let stack = [];
+
+    function updateStatus() {
+      if (stack.length === 0) statusMessage.textContent = "Stack is empty.";
+      else if (stack.length === 5)
+        statusMessage.textContent = "⚠️ Stack is full. Pop elements to continue.";
+      else statusMessage.textContent = "Top element: " + stack[stack.length - 1];
+    }
+
+    pushBtn.addEventListener("click", () => {
+      const value = input.value.trim();
+      if (value === "") return alert("⚠️ Enter a value!");
+      if (stack.length >= 5) return alert("🚫 Stack Overflow!");
+      stack.push(value);
+      input.value = "";
+      const item = document.createElement("div");
+      item.classList.add("stack-item", "push-animation");
+      item.textContent = value;
+      stackContainer.appendChild(item);
+      updateStatus();
+    });
+
+    popBtn.addEventListener("click", () => {
+      if (stack.length === 0) return alert("⚠️ Stack Underflow!");
+      const top = stackContainer.lastElementChild;
+      if (top && top.classList.contains("stack-item")) {
+        top.classList.add("pop-animation");
+        setTimeout(() => {
+          top.remove();
+          stack.pop();
+          updateStatus();
+        }, 300);
+      }
+    });
+    updateStatus();
+
+    // === INFIX TO POSTFIX VISUALIZER ===
+    let visualStack = [], output = [], steps = [], i = 0;
+    const precedence = op => (op === '+' || op === '-') ? 1 : (op === '*' || op === '/') ? 2 : (op === '^') ? 3 : 0;
+
+    function updateDisplay() {
+      const stackArea = document.getElementById('stackArea');
+      const outputArea = document.getElementById('outputArea');
+      stackArea.innerHTML = ''; outputArea.innerHTML = '';
+      [...visualStack].reverse().forEach(el => {
+        const box = document.createElement('div');
+        box.className = 'box'; box.textContent = el;
+        stackArea.appendChild(box);
+      });
+      output.forEach(el => {
+        const box = document.createElement('div');
+        box.className = 'box'; box.textContent = el;
+        outputArea.appendChild(box);
+      });
+    }
+
+    function explainStep(txt){ document.getElementById('step').textContent = txt; }
+
+    function startConversion() {
+      const expr = document.getElementById('expression').value.replace(/\s+/g,'');
+      if (!expr) return alert("Enter an expression first!");
+      visualStack = []; output = []; steps = expr.split(''); i=0;
+      explainStep("Starting conversion..."); updateDisplay(); processStep();
+    }
+
+    function processStep() {
+      if (i >= steps.length) {
+        while (visualStack.length) output.push(visualStack.pop());
+        explainStep("✅ Conversion Complete!"); updateDisplay(); return;
+      }
+      let ch = steps[i++];
+      if (/[A-Za-z0-9]/.test(ch)) { output.push(ch); explainStep(`Operand '${ch}' → added to output.`); }
+      else if (ch==='('){ visualStack.push(ch); explainStep("Found '(' → push to stack."); }
+      else if (ch===')'){ while(visualStack.length && visualStack.at(-1)!=='(') output.push(visualStack.pop());
+        visualStack.pop(); explainStep("Found ')' → pop until '(' removed."); }
+      else { while(visualStack.length && precedence(visualStack.at(-1))>=precedence(ch)) output.push(visualStack.pop());
+        visualStack.push(ch); explainStep(`Operator '${ch}' → push to stack.`); }
+      updateDisplay(); setTimeout(processStep,1500);
+    }
+
+    // === POSTFIX EVALUATION VISUALIZER ===
+    let evalStack=[], evalSteps=[], j=0;
+    function updateEvalDisplay(){
+      const area=document.getElementById('evalStackArea');
+      area.innerHTML=''; [...evalStack].reverse().forEach(el=>{
+        const box=document.createElement('div'); box.className='box'; box.textContent=el;
+        area.appendChild(box);
+      });
+    }
+
+    function startEvaluation(){
+      const expr=document.getElementById('postfixExpr').value.trim();
+      if(!expr)return alert("Enter a postfix expression!");
+      evalStack=[]; evalSteps=expr.split(''); j=0;
+      document.getElementById('evalStep').textContent="Starting evaluation...";
+      document.getElementById('eval-output').textContent=""; updateEvalDisplay(); evalStepProcess();
+    }
+
+    function evalStepProcess(){
+      if(j>=evalSteps.length){
+        document.getElementById('evalStep').textContent="✅ Evaluation Complete!";
+        document.getElementById('eval-output').innerHTML="Result: <b>"+evalStack[0]+"</b>";
+        updateEvalDisplay(); return;
+      }
+      const ch=evalSteps[j++];
+      if(!isNaN(ch)){ evalStack.push(parseInt(ch)); document.getElementById('evalStep').textContent=`Operand ${ch} → pushed to stack.`; }
+      else{
+        const b=evalStack.pop(), a=evalStack.pop(); let res;
+        switch(ch){ case '+':res=a+b;break;case '-':res=a-b;break;case '*':res=a*b;break;case '/':res=a/b;break;}
+        evalStack.push(res);
+        document.getElementById('evalStep').textContent=`Operator '${ch}': ${a}${ch}${b}=${res}`;
+      }
+      updateEvalDisplay(); setTimeout(evalStepProcess,1500);
+    }
+
+    
+  </script>
+</body>
+</html>

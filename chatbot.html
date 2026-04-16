@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vistruct - Chatbot</title>
+<link rel="stylesheet" href="style.css">
+<style>
+body {
+  font-family: 'Poppins', sans-serif;
+  background: linear-gradient(135deg, #e0c3fc, #8ec5fc);
+  margin: 0;
+  padding: 0;
+  color: #333;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.container {
+  margin-top: 60px;
+  text-align: center;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+h2 {
+  font-size: 2rem;
+  color: #5a00b3;
+  margin-bottom: 10px;
+}
+
+.chatbox {
+  width: 90%;
+  max-width: 600px;
+  height: 450px;
+  background-color: white;
+  border-radius: 15px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  margin-top: 30px;
+}
+
+.chat-messages {
+  flex-grow: 1;
+  padding: 15px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.message {
+  padding: 10px 15px;
+  border-radius: 20px;
+  max-width: 75%;
+  font-size: 15px;
+  line-height: 1.4;
+  word-wrap: break-word;
+}
+
+.user-message {
+  align-self: flex-end;
+  background-color: #5a00b3;
+  color: white;
+}
+
+.bot-message {
+  align-self: flex-start;
+  background-color: #e5e5e5;
+  color: #333;
+}
+
+.chat-input {
+  display: flex;
+  padding: 10px;
+  background-color: #f0f0f0;
+  border-top: 1px solid #ccc;
+  align-items: center;
+}
+
+.chat-input input {
+  flex-grow: 1;
+  border: none;
+  border-radius: 20px;
+  padding: 10px 15px;
+  font-size: 15px;
+  outline: none;
+}
+
+#micBtn {
+  background-color: #ff3b3b;
+  color: white;
+  padding: 10px 15px;
+  border-radius: 50%;
+  font-size: 20px;
+  margin-left: 10px;
+  border: none;
+  cursor: pointer;
+}
+
+#micBtn.listening {
+  background-color: #00c853;
+  animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.15); }
+  100% { transform: scale(1); }
+}
+
+/* Voice toggle button */
+#voiceToggle {
+  background-color: #5a00b3;
+  color: white;
+  padding: 10px 15px;
+  font-size: 20px;
+  margin-left: 10px;
+  border-radius: 50%;
+  border: none;
+}
+
+#voiceToggle.muted {
+  background-color: #888;
+  animation: mutedPulse 1s infinite;
+}
+
+@keyframes mutedPulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+.sendBtn {
+  background-color: #5a00b3;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  margin-left: 10px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.sendBtn:hover {
+  background-color: #450085;
+}
+
+footer {
+  text-align: center;
+  padding: 15px;
+  font-size: 14px;
+  background-color: rgba(255,255,255,0.3);
+  color: #222;
+  font-weight: 500;
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <h1>Vistruct</h1>
+  <ul>
+    <li><a href="index.html">Home</a></li>
+    <li><a href="array1.html">Array</a></li>
+    <li><a href="stack.html">Stack</a></li>
+    <li><a href="queue.html">Queue</a></li>
+    <li><a href="linkedlist.html">Linked List</a></li>
+    <li><a href="tree.html">Tree</a></li>
+    <li><a href="graph.html">Graph</a></li>
+    <li><a href="chatbot.html" class="active">Chatbot</a></li>
+  </ul>
+</nav>
+
+<div class="container">
+<h2>Data Structures Chatbot</h2>
+<p>Ask questions about Arrays, Stacks, Queues, Linked Lists, Trees and Graphs!</p>
+
+<div class="chatbox">
+  <div class="chat-messages" id="chatMessages">
+    <div class="bot-message message">👋 Hi! I’m VistructBot. Ask me anything about data structures.</div>
+  </div>
+
+  <div class="chat-input">
+    <input type="text" id="userInput" placeholder="Type your question..." onkeypress="handleKey(event)">
+    <button id="micBtn" onclick="toggleMic()">🎤</button>
+    <button class="sendBtn" onclick="sendMessage()">Send</button>
+    <button id="voiceToggle" title="Toggle voice output">🔊</button>
+  </div>
+</div>
+</div>
+
+<footer>© 2025 Vistruct - Data Structures Visualizer</footer>
+
+<script>
+const chatMessages = document.getElementById("chatMessages");
+let voiceEnabled = true;
+const voiceToggleBtn = document.getElementById("voiceToggle");
+
+// ---------------- Voice toggle ----------------
+voiceToggleBtn.addEventListener("click", () => {
+  voiceEnabled = !voiceEnabled;
+
+  if (!voiceEnabled) {
+    window.speechSynthesis.pause();
+    voiceToggleBtn.classList.add("muted");
+    voiceToggleBtn.textContent = "🔇";
+  } else {
+    window.speechSynthesis.resume();
+    voiceToggleBtn.classList.remove("muted");
+    voiceToggleBtn.textContent = "🔊";
+  }
+});
+
+// ---------------- Input handling ----------------
+function handleKey(event) {
+  if (event.key === "Enter") sendMessage();
+}
+
+function sendMessage() {
+  const input = document.getElementById("userInput");
+  const text = input.value.trim();
+  if (!text) return;
+
+  addMessage(text, "user-message");
+  input.value = "";
+  setTimeout(() => botReply(text), 700);
+}
+
+function addMessage(text, className) {
+  const msg = document.createElement("div");
+  msg.classList.add("message", className);
+  msg.textContent = text;
+  chatMessages.appendChild(msg);
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+// ---------------- Typewriter effect ----------------
+function typeWriterEffect(fullText) {
+  const msg = document.createElement("div");
+  msg.classList.add("message", "bot-message");
+  chatMessages.appendChild(msg);
+
+  let index = 0;
+  function showNextLetter() {
+    if (index < fullText.length) {
+      msg.textContent += fullText.charAt(index);
+      index++;
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+      setTimeout(showNextLetter, 55);
+    }
+  }
+  showNextLetter();
+}
+
+// ---------------- Bot replies ----------------
+function botReply(text) {
+  let reply = "";
+  const msg = text.toLowerCase();
+
+  // ---------- DATA STRUCTURE BASICS ----------
+  if (msg.includes("what is data structure")|| msg.includes("what is a data structure")||msg.includes("what is ds") ||msg.includes("define ds") || msg.includes("define data structure") || msg.includes("explain data structure")) 
+    reply = " A Data Structure is a systematic way of organizing and storing data so that it can be accessed and modified efficiently. It helps optimize memory usage, processing time, and overall program performance. Data Structures form the foundation of complex algorithms, operating systems, databases, and real-world applications.";
+
+  else if (msg.includes("why data structure") || msg.includes("importance of ds")) 
+    reply = " Data Structures are important because they enable efficient data handling, faster execution of operations like searching and sorting, better memory utilization, and improved performance in real-time applications such as AI, networking, IoT, and database management.";
+
+  else if (msg.includes("types of data structure") || msg.includes("list data structures") || msg.includes("classification of ds"))
+    reply = " Data Structures are mainly classified into two categories:\n1. Linear DS – Arranged sequentially (Array, Stack, Queue, Linked List).\n2. Non-Linear DS – Hierarchical or network-based (Trees, Graphs, Heaps). Each structure serves specific use-cases based on requirements.";
+
+  // ---------- LINEAR / NON-LINEAR ----------
+  else if (msg.includes("what is linear data structure") || msg.includes("explain linear ds")|| msg.includes("explain linear data structure")) 
+    reply = " A Linear Data Structure arranges elements in a sequential manner so every element is connected to its previous and next element. Traversal is done in a single direction. Examples include Array, Stack, Queue and Linked List.";
+  else if (msg.includes("examples of linear data structure")|| msg.includes("examples of linear ds"))
+    reply = "Examples of linear data structure are Array, Stack, Queue and Linked list"; 
+
+  else if (msg.includes("what is non linear data structure") || msg.includes("explain non linear ds")|| msg.includes("explain non linear data structure")) 
+    reply = " Non-Linear Data Structures store elements in hierarchical form instead of a straight sequence. They support complex relationships among data. Examples are Trees, Graphs, and Heaps. They are used in AI search algorithms, file systems, networking, and database indexing.";
+  else if (msg.includes("examlpes of non linear data structure")|| msg.includes("examples of non linear ds"))
+    reply = "Examples of non linear data structure are Trees, Graphs and Heaps"; 
+
+  // ---------- ARRAY ----------
+  else if (msg.includes("what is array")|| msg.includes("what is a array")|| msg.includes("what is an array") || msg.includes("define array") || msg.includes("array working")) 
+    reply = " Array is a collection of similar data items stored at continuous memory locations. Each element is accessed using an index, which makes retrieval extremely fast. However, arrays are static and cannot change size once created, making insertion and deletion expensive.";
+
+  else if (msg.includes("array operations")|| msg.includes("operations of array")) 
+    reply = " Common Array operations include:\n Insertion, \n Deletion, \n Searching, \n Traversal and\n Sorting. ";
+
+  else if (msg.includes("array types")|| msg.includes("types of array")) 
+    reply = "Types of Array:1.One dimensional array(1D array) array,\n2.Two dimensional array(2D array),\n3.Multi-dimensional array";
+
+  else if (msg.includes("array advantages and disadvantages")|| msg.includes("advantages and disadvantages of array")|| msg.includes("advantages of array")|| msg.includes("disadvantages of array")) 
+    reply = " Advantages of arrays:\n Fast random access using index O(1),\n Simple & easy implementation,\n Useful for storing structured data like matrices or records,\n Efficient in memory layout due to contiguous allocation. Disadvantages of arrays:\n Fixed size – cannot grow/shrink,\n Costly insertion & deletion,\n Wastage of memory if size is not utilized and\n Must know size in advance";
+
+  // ---------- LINKED LIST ----------
+  else if (msg.includes("what is linked list")|| msg.includes("what is a linked list") || msg.includes("define linked list") || msg.includes("explain linked list")) 
+    reply = " A Linked List is a dynamic data structure consisting of nodes, where each node contains data and a pointer to the next node. It grows and shrinks during runtime, allowing efficient insertion and deletion, but lacks direct access to elements.";
+
+  else if (msg.includes("types of linked list")) 
+    reply = " Types of Linked List:\n1. Singly Linked List\n2. Doubly Linked List\n3. Circular Linked List\n4. Circular Doubly Linked List";
+
+  else if (msg.includes("linked list advantages and disadvantages")|| msg.includes("advantages and disadvantages of linked list")|| msg.includes("advantages of linked list")|| msg.includes("disadvantages of linked list")) 
+    reply = " Advantages of linked list:\n✔ Dynamic size\n✔ Efficient insertion & deletion anywhere in list\n✔ Memory usage flexible\n✔ Easy implementation of queues & stacks.   Disadvantages of linked list:\n No random access,\n Uses extra memory for pointers,\n Difficult reverse traversal and\n Performance slower than arrays";
+
+  // ---------- STACK ----------
+  else if (msg.includes("what is stack") || msg.includes("what is a stack")|| msg.includes("define stack") || msg.includes("explain stack")) 
+    reply = " A Stack is a linear data structure that follows LIFO (Last In First Out) principle. Elements are added using PUSH and removed using POP. The most recently inserted item is always processed first. Stacks are used for backtracking, undo operations, and expression evaluation.";
+
+  else if (msg.includes("stack operations")|| msg.includes("operations of stack")) 
+    reply = " Stack Operations:\n push() – Insert item,\n pop() – Remove item,\n peek() – View top element,\n isEmpty() – Check if empty,\n isFull() – Check if full";
+
+  else if (msg.includes("stack applications")) 
+    reply = " Applications of Stack:\n Undo/Redo operations\n Browser back history\n Recursion & function call tracking\n Expression evaluation";
+
+  else if (msg.includes("stack advantages and disadvantages")|| msg.includes("advantages and disadvantages of stack")|| msg.includes("advantages of stack")|| msg.includes("disadvantages of stack"))
+    reply = "Advantages of stack:\nSimple and fast,Efficient memory use,Esay to implement,and Supports backtracking.Disadvantages of stack:Limited size, Retricted access, Not suitable for large data and Inefficient for search";
+
+  // ---------- QUEUE ----------
+  else if (msg.includes("what is queue") || msg.includes("define queue") || msg.includes("explain queue")) 
+    reply = " Queue is a linear data structure that follows FIFO (First In First Out). Elements are inserted at the rear and removed from the front. It is used where order of processing must be maintained like scheduling and streaming.";
+
+  else if (msg.includes("types of queue")) 
+    reply = " Types of Queues:\n1. Simple Queue\n2. Circular Queue\n3. Priority Queue\n4. Double-ended Queue (Dequeue)";
+
+  else if (msg.includes("queue applications")) 
+    reply = " Applications:\n Call center queues\n CPU scheduling\n Load balancing\n Ticket booking lines & real-life queues";
+
+  else if (msg.includes("queue advantages and disadvantages")|| msg.includes("advantages and disadvantages of queue")|| msg.includes("advantages of queue")|| msg.includes("disadvantages of queue"))
+    reply = "ADVANTAGES OF QUEUE:Easy to implement, Prevents overloading, Supports FIFO Order(First In, First Out) and Efficient for managing tasks.  \n DISADVANTAGES OF QUEUE:Limited access, Fixed size in static implementation, Inefficient in linear queue and Searching is slow";
+  
+  // ---------- TREES ----------
+  else if (msg.includes("what is tree") || msg.includes("define tree") || msg.includes("explain tree")) 
+    reply = " Tree is a hierarchical non-linear data structure consisting of nodes connected by edges. It has one root node and multiple levels of children. Trees are used in databases, file storage, and search optimization.";
+
+  else if (msg.includes("tree traversal")) 
+    reply = " Tree Traversal Methods:\n Inorder (L-R-Root)\n Preorder (Root-L-R)\n Postorder (L-R-Root)\n Level order (Top→Bottom). Used to explore & process nodes systematically.";
+
+  else if (msg.includes("bst") || msg.includes("binary search tree")) 
+    reply = " BST is a binary tree where left subtree values < root & right subtree values > root. This structure enables fast search, insertion, and deletion in O(log n) on average.";
+
+  else if (msg.includes("trees advantages and disadvantages")|| msg.includes("advantages and disadvantages of trees")|| msg.includes("advantages of trees")|| msg.includes("disadvantages of trees"))
+    reply = "Advantages of trees:Hierarchical structure, Fast searching, Efficient Insertion and Deletion and Supports multiple types of traversals.Disadvantages of trees:Can become unbalanced, More complex implementation, Extra memory usage and Traversal is time-consuming";
+
+  // ---------- GRAPH ----------
+  else if (msg.includes("what is graph") || msg.includes("what is a graph")|| msg.includes("explain graph")) 
+    reply = " A Graph is a non-linear structure containing vertices (nodes) and edges (connections). Graphs represent networks such as social media, maps, and communication links.";
+
+  else if (msg.includes("bfs")) 
+    reply = " BFS (Breadth First Search) explores level by level using a Queue. It finds the shortest path in unweighted graphs and is widely used in navigation systems and peer-to-peer networks.";
+
+  else if (msg.includes("dfs")) 
+    reply = " DFS (Depth First Search) explores deep into nodes using a Stack or recursion. It is useful for solving puzzles, maze problems, cycle detection, and dependency resolution.";
+
+  else if (msg.includes("graph advantages and disadvantages")|| msg.includes("advantages and disadvantages of graph")|| msg.includes("advantages of graph")|| msg.includes("disadvantages of graph"))
+    reply = "Advantages of graph:Represent complex relationships, Models Real-World problems easily, Efficient path finding and Useful in networking.Disadvantages of graph:High memory usage, Complex implementation, Difficult to represent large graphs and Slow operations on Dense graphs";
+
+  // ---------- ALGORITHMS ----------
+  else if (msg.includes("what is sorting") || msg.includes("sorting definition")) 
+    reply = " Sorting rearranges data elements in ascending or descending order. It improves searching efficiency and is used in databases, ranking systems, and analytics.";
+
+  else if (msg.includes("sorting algorithms")) 
+    reply = " Sorting Algorithms include:\n Bubble Sort,\n Selection Sort,\n Insertion Sort,\n Merge Sort,\n Quick Sort and\n Heap Sort";
+
+  else if (msg.includes("binary search")) 
+    reply = " Binary Search divides a sorted array repeatedly into halves to find a target value. It reduces search complexity from O(n) to O(log n), making it much faster.";
+
+  else if (msg.includes("linear search")) 
+    reply = " Linear Search checks elements one by one until the item is found. It works on both sorted & unsorted data but is slower with O(n) complexity.";
+
+  // ---------- COMPLEXITY ----------
+  else if (msg.includes("time complexity")) 
+    reply = " Time complexity measures the execution time of an algorithm based on input size. It helps compare efficiency and select the best solution to a problem.";
+
+  else if (msg.includes("big o")) 
+    reply = " Big-O notation represents the worst-case performance of an algorithm. Example: Binary Search O(log n), Linear Search O(n), Quick Sort O(n log n).";
+
+  // ---------- VISUSTRUCT ----------
+  else if (msg.includes("what is vistruct") || msg.includes("purpose of vistruct")) 
+    reply = " Vistruct is an educational tool for visualizing data structures using animation. It helps students understand complex operations like insertion, deletion, and traversal through dynamic simulation, making DS learning easier and more interactive.";
+
+  else if (msg.includes("who are you") || msg.includes("who r u") || msg.includes("what is your name")) 
+    reply = "I’m Vistruct… the chatbot who falls a little more in love with every question you ask.";
+
+
+  // ---------- DEFAULT ----------
+  else reply = " I didn't catch that! Try asking about:\n Array,\n Stack,\n Queue,\n linked list,\n tree and \n graph.";
+
+  typeWriterEffect(reply);  
+  if (voiceEnabled) speak(reply);  
+}
+// ---------------- Speak ----------------
+function speak(text){
+  if (!voiceEnabled) return;
+  const speech = new SpeechSynthesisUtterance(text);
+  speech.lang = "en-US";
+  speech.rate = 1.2;
+  window.speechSynthesis.speak(speech);
+}
+
+// ---------------- Voice input (MIC TOGGLE) ----------------
+let recognition;
+let isListening = false;
+
+if ("webkitSpeechRecognition" in window) {
+  recognition = new webkitSpeechRecognition();
+  recognition.continuous = false;
+  recognition.interimResults = false;
+  recognition.lang = "en-US";
+}
+
+const micBtn = document.getElementById("micBtn");
+
+function toggleMic() {
+  if (!recognition) {
+    alert("Voice input not supported. Use Chrome.");
+    return;
+  }
+
+  if (!isListening) {
+    // Start listening
+    isListening = true;
+    micBtn.classList.add("listening");
+    micBtn.textContent = "🎙️";
+    recognition.start();
+  } else {
+    // Stop listening
+    isListening = false;
+    micBtn.classList.remove("listening");
+    micBtn.textContent = "🎤";
+    recognition.stop();
+  }
+}
+
+recognition.onresult = function(event) {
+  const speechText = event.results[0][0].transcript;
+  document.getElementById("userInput").value = speechText;
+  sendMessage();
+};
+
+recognition.onend = function() {
+  if (!isListening) {
+    micBtn.classList.remove("listening");
+    micBtn.textContent = "🎤";
+  }
+};
+
+recognition.onerror = function() {
+  isListening = false;
+  micBtn.classList.remove("listening");
+  micBtn.textContent = "🎤";
+  alert("Voice recognition error.");
+};
+</script>
+
+</body>
+</html>

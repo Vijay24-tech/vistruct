@@ -1,0 +1,114 @@
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #e0c3fc, #8ec5fc);
+      color: black;
+      margin: 0;
+      padding: 0;
+      text-align: center;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    pre {
+      font-family: 'Poppins', sans-serif;
+    }
+
+    nav {
+      background: #1e272e;
+      padding: 1rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    nav h1 {
+      color: #00a8ff;
+      font-size: 1.4rem;
+      margin: 0;
+    }
+
+    nav ul {
+      list-style: none;
+      display: flex;
+      gap: 20px;
+      margin: 0;
+      padding: 0;
+    }
+
+    nav ul li a {
+      color: #d2dae2;
+      text-decoration: none;
+      font-weight: 500;
+      transition: 0.3s;
+      padding: 6px 10px;
+      border-radius: 6px;
+    }
+
+    nav ul li a:hover {
+      background: #00a8ff;
+      color: white;
+    }
+
+    nav ul li a.active {
+      background: #00a8ff;
+      color: white;
+      font-weight: bold;
+    }
+
+    .container {
+      margin-top: 50px;
+    }
+
+    .image-section {
+      position: relative;
+      display: inline-block;
+      margin-top: 30px;
+    }
+
+    img {
+      width: 780px;
+      height: 450px;
+      border-radius: 15px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Developers box fixed beside image (bottom-right) */
+    .developers {
+      position: absolute;
+      bottom: 15px;
+      right: -370px; /* moves it beside the image, not over it */
+       background: linear-gradient(135deg, #e0c3fc, #8ec5fc);
+      color: #1e272e;
+      border-radius: 15px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      padding: 20px 30px;
+      width: 300px;
+      text-align: left;
+    }
+
+    .developers h3 {
+      color: #00a8ff;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+
+    .developers ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      font-weight: 500;
+    }
+
+    .developers ul li {
+      margin: 8px 0;
+      padding-left: 8px;
+      position: relative;
+    }
+
+    .developers ul li::before {
+      content: "👩‍💻";
+      position: absolute;
+      left: -20px;
+    }
+  
